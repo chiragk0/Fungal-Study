@@ -1,0 +1,234 @@
+---
+title: "Fungal Study - Water Potential"
+author: "Chirag Kulkarni"
+date: '2022-04-26'
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  html_document:
+    toc: yes
+    toc_depth: 3
+---
+
+
+```{r}
+library(tidyverse)
+library(jtools)
+library(gridExtra)
+library(sjPlot)
+library(sjmisc)
+```
+
+```{r}
+#read in the dataset by each solute
+sucrose <- read.csv("~/Downloads/UCR/2021-2022/Spring2022/stat183/Individual Project/Sucrose.csv")
+kcl <- read.csv("~/Downloads/UCR/2021-2022/Spring2022/stat183/Individual Project/KCL.csv")
+nacl <- read.csv("~/Downloads/UCR/2021-2022/Spring2022/stat183/Individual Project/NaCl.csv")
+glycerol <- read.csv("~/Downloads/UCR/2021-2022/Spring2022/stat183/Individual Project/glycerol.csv")
+```
+
+```{r}
+#summary statistics
+summary(sucrose)
+summary(kcl)
+summary(nacl)
+summary(glycerol)
+```
+
+```{r}
+#filters the dataset by trials
+sucrose_t1 <- filter(sucrose, Trial == 1)
+sucrose_t2 <- filter(sucrose, Trial == 2)
+kcl_t1 <- filter(kcl, Trial == 1)
+kcl_t2 <- filter(kcl, Trial == 2)
+nacl_t1 <- filter(nacl, Trial == 1)
+nacl_t2 <- filter(nacl, Trial == 2)
+glycerol_t1 <- filter(glycerol, Trial == 1)
+glycerol_t2 <- filter(glycerol, Trial == 2)
+```
+
+```{r}
+#sucrose linear model
+sucrose_model <- lm(Diameter..cm. ~ MPa + Trial + MPa*Trial, data = sucrose)
+summary(sucrose_model)
+
+kcl_model <- lm(Diameter..cm. ~ MPa + Trial + MPa*Trial, data = kcl)
+summary(kcl_model)
+
+nacl_model <- lm(Diameter..cm. ~ MPa + Trial + MPa*Trial, data = nacl)
+summary(nacl_model)
+
+glycerol_model <- lm(Diameter..cm. ~ MPa + Trial + MPa*Trial, data = glycerol)
+summary(glycerol_model)
+```
+
+```{r}
+#finds the coefficients for linear regression and residual values
+summary(lm(Diameter..cm. ~ MPa, data = sucrose))
+summary(lm(Diameter..cm. ~ MPa, data = kcl))
+summary(lm(Diameter..cm. ~ MPa, data = nacl))
+summary(lm(Diameter..cm. ~ MPa, data = glycerol))
+
+#linear regression summaries for the first trials
+sucrose_t1_reg <- lm(Diameter..cm. ~ MPa, data = sucrose_t1)
+  summary(lm(Diameter..cm. ~ MPa, data = sucrose_t1))
+kcl_t1_reg <-  lm(Diameter..cm. ~ MPa, data = kcl_t1)
+  summary(lm(Diameter..cm. ~ MPa, data = kcl_t1))
+nacl_t1_reg <- lm(Diameter..cm. ~ MPa, data = nacl_t1)
+  summary(lm(Diameter..cm. ~ MPa, data = nacl_t1))
+glycerol_t1_reg <- lm(Diameter..cm. ~ MPa, data = glycerol_t1)
+  summary(lm(Diameter..cm. ~ MPa, data = glycerol_t1))
+
+#linear regression summaries for the second trials
+sucrose_t2_reg <- lm(Diameter..cm. ~ MPa, data = sucrose_t2)
+  summary(lm(Diameter..cm. ~ MPa, data = sucrose_t2))
+kcl_t2_reg <-  lm(Diameter..cm. ~ MPa, data = kcl_t2)
+  summary(lm(Diameter..cm. ~ MPa, data = kcl_t2))
+nacl_t2_reg <- lm(Diameter..cm. ~ MPa, data = nacl_t2)
+  summary(lm(Diameter..cm. ~ MPa, data = nacl_t2))
+glycerol_t2_reg <- lm(Diameter..cm. ~ MPa, data = glycerol_t2)
+  summary(lm(Diameter..cm. ~ MPa, data = glycerol_t2))
+```
+
+```{r}
+#create reduced model by removing the insignificant terms
+sucrose_model_reduced <- lm(Diameter..cm. ~ MPa, data = sucrose)
+summary(sucrose_model_reduced)
+
+kcl_model_reduced <- lm(Diameter..cm. ~ MPa, data = kcl)
+summary(kcl_model_reduced)
+
+nacl_model_reduced <- lm(Diameter..cm. ~ MPa, data = nacl)
+summary(nacl_model_reduced)
+
+glycerol_model_reduced <- lm(Diameter..cm. ~ MPa, data = glycerol)
+summary(glycerol_model_reduced)
+```
+
+```{r}
+#check for model assumptions
+par(mfrow=c(2,2))
+plot(sucrose_model_reduced)
+par(mfrow=c(2,2))
+plot(kcl_model_reduced)
+par(mfrow=c(2,2))
+plot(nacl_model_reduced)
+par(mfrow=c(2,2))
+plot(glycerol_model_reduced)
+```
+
+```{r}
+#plot the interactions
+sucrose_interaction <- lm(Diameter..cm. ~ MPa + Trial + MPa * Trial, data = sucrose,)
+plot_model(sucrose_interaction, type = "int",
+           title = "Interaction between Trial and MPa in Sucrose")
+
+kcl_interaction <- lm(Diameter..cm. ~ MPa + Trial + MPa * Trial, data = kcl)
+plot_model(kcl_interaction, type = "int",
+           title = "Interaction between Trial and MPa in KCl")
+
+nacl_interaction <- lm(Diameter..cm. ~ MPa + Trial + MPa * Trial, data = nacl)
+plot_model(nacl_interaction, type = "int",
+           title = "Interaction between Trial and MPa in NaCl")
+
+glycerol_interaction <- lm(Diameter..cm. ~ MPa + Trial + MPa * Trial, data = glycerol)
+plot_model(glycerol_interaction, type = "int",
+           title = "Interaction between Trial and MPa in Glycerol")
+```
+
+```{r}
+#scatterplots for both trials (check if it is linear or quadratic trend)
+#add fitted line onto the scatterplots
+
+#sucrose
+sucrose_plot <- ggplot(sucrose, aes(x = MPa, y = Diameter..cm.)) +
+  geom_point() +
+  labs(
+    title ="sucrose",
+    y = "Diameter..cm.",
+    x = "MPa"
+  ) +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_minimal() 
+
+#kcl
+kcl_plot <- ggplot(kcl, aes(x = MPa, y = Diameter..cm.)) +
+  geom_point() +
+  labs(
+    title="kcl",
+    y = "Diameter..cm.",
+    x = "MPa"
+  ) +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_minimal()
+
+#glycerol
+glycerol_plot <- ggplot(glycerol, aes(x = MPa, y = Diameter..cm.)) +
+  geom_point() +
+  labs(
+    title = "glycerol",
+    y = "Diameter..cm.",
+    x = "MPa"
+  ) +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_minimal()
+
+#nacl
+nacl_plot <- ggplot(nacl, aes(x = MPa, y = Diameter..cm.)) +
+  geom_point() +
+  labs(
+    title = "nacl",
+    y = "Diameter..cm.",
+    x = "MPa"
+  ) +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_minimal()
+
+grid.arrange(sucrose_plot, kcl_plot, nacl_plot, glycerol_plot, ncol=2)
+```
+
+```{r}
+#combined model with material interactions
+new_sucrose<-transform(sucrose, Material = "sucrose")
+new_glycerol<-transform(glycerol, Material = "glycerol")
+new_kcl<-transform(kcl, Material = "kcl")
+new_nacl<-transform(nacl, Material = "nacl")
+
+combined_data<-rbind(new_sucrose, new_kcl, new_nacl, new_glycerol)
+  
+combined_model <- lm(Diameter..cm. ~ MPa + Trial + Material + MPa*Trial + MPa*Material + Trial*Material + MPa*Trial*Material, data = combined_data)
+summary(combined_model)
+
+#reduced combined model to include significant interactions only
+combined_model_reduced <- lm(Diameter..cm. ~ MPa, data = combined_data)
+summary(combined_model_reduced)
+
+#test for model assumptions
+plot(combined_model_reduced)
+
+#plot for the combined model
+combined_plot <- ggplot(combined_model_reduced, aes(x = MPa, y = Diameter..cm.)) +
+  geom_point() +
+  labs(
+    title = "Full Model",
+    y = "Diameter..cm.",
+    x = "MPa"
+  ) +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_minimal()
+```
+
+```{r}
+#fit a quadratic regression line into the combined model
+combined_plot_quad <- ggplot(combined_model_reduced, aes(x = MPa, y = Diameter..cm.)) +
+  geom_point() +
+  labs(
+    title = "Full Model",
+    y = "Diameter..cm.",
+    x = "MPa"
+  ) +
+  geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE)+
+  theme_minimal()
+```
+
