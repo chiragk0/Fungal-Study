@@ -1,6 +1,4 @@
-*A Study of the Survival and Growth of a Fungal Species under Different Conditions*
-
-### Objectives:
+## Objectives:
 
 -Want to test if the fungi grows the same in different temperatures, PH values, and water potential using different solutes.
 
